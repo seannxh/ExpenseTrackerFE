@@ -1,6 +1,6 @@
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
-import ExpenseChart from '../components/Chart';
+import ExpenseChart from '../components/ExpenseChart';
 
 const Dashboard = () => {
   return (
