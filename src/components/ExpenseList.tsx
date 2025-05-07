@@ -49,7 +49,7 @@ const ExpenseList = () => {
   );
 
   return (
-    <div className="p-4 rounded-md text-white border border-white">
+    <div className="p-4 rounded-md text-white border border-white ">
       <form
         onSubmit={(e) => {
           e.preventDefault();

@@ -32,7 +32,7 @@ const Signup = () => {
   return (
     <div className="fixed inset-0 flex overflow-hidden">
       {/* Left side */}
-      <div className="flex-1 bg-[#282c34] hidden md:flex items-center justify-center">
+      <div className="flex-1 bg-gray-300 hidden md:flex items-center justify-center">
         {/* Optional: Logo or illustration */}
       </div>
 

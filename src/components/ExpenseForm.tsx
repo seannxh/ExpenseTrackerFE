@@ -42,7 +42,7 @@ const ExpenseForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 ">
       {message && (
         <p className={`text-sm ${message.includes('✅') ? 'text-teal-400' : 'text-red-400'}`}>
           {message}
