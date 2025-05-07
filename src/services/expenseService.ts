@@ -33,7 +33,7 @@ export const getExpenses = async (): Promise<Expense[]> => {
     throw err;
   }
 };
-
+                                            //remove id when sending request
 export const createExpense = async (expense: Omit<Expense, 'id'>): Promise<Expense> => {
   try {
     const res = await API.post('/expenses/create', expense);
