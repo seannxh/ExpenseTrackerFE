@@ -12,9 +12,9 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const sendFinanceQuestion = async (message: string): Promise<string> => {
+export const sendFinanceQuestion = async (response: string): Promise<string> => {
   try {
-    const res = await API.post('/chat', { message });
+    const res = await API.post('/chat', { response });
     return res.data.response;
   } catch (err) {
     console.error('Chat AI failed:', err);
