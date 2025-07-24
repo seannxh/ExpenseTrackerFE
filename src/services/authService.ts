@@ -1,8 +1,11 @@
 import axios from 'axios';
+import { createRunnableDevEnvironment } from 'vite';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
+
+if (!API) throw new Error('API base URL is not defined');
 
 // Automatically attach JWT token
 API.interceptors.request.use((config) => {
@@ -14,44 +17,71 @@ API.interceptors.request.use((config) => {
 });
 
 
-export const login = async (email: string, password: string) => {
-  try {
-    const res = await API.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('refreshToken', res.data.refreshToken);
-  } catch (err) {
-    console.error('Login failed:', err);
-    throw err;
-  }
+type LoginResponse = {
+  token: string;
+  refreshToken: string;
 };
 
 
-export const signup = async (name: string, email: string, password: string) => {
+export const login = async (credentials: { email: string; password: string }): Promise<LoginResponse> => {
   try {
-    const res = await API.post('/auth/signup', { name, email, password });
+    const res = await API.post<LoginResponse>('/auth/login', credentials);
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('refreshToken', res.data.refreshToken);
+    return res.data;
+  } catch (err) {
+    console.error('Login failed:', err);
+    throw err;
+  } 
+}
+
+type AuthResponse = {
+  token: string;
+  refreshToken: string;
+};
+
+type SignupCredentials = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+
+export const signup = async (credentials: SignupCredentials): Promise<AuthResponse> => {
+  try {
+    const res = await API.post<AuthResponse>('/auth/signup', credentials);
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('refreshToken', res.data.refreshToken);
+    return res.data;
   } catch (err) {
     console.error('Signup failed:', err);
     throw err;
   }
 };
 
+type RefreshTokenResponse = {
+  token: string;
+};
 
-export const refreshToken = async (refreshToken: string): Promise<void> => {
+export const refreshToken = async (refreshToken: string): Promise<RefreshTokenResponse> => {
   try {
     const res = await API.post('/auth/refresh', { refreshToken });
     localStorage.setItem('token', res.data.token);
+    return res.data;
   } catch (err) {
     console.error('Refresh token failed:', err);
     throw err;
   }
 };
 
-
-export const updateUser = async (name: string, email: string, password: string) => {
+type UpdateUserData = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
+export const updateUser = async (data: UpdateUserData): Promise<void> => {
   try {
-    await API.put('/auth/update', { name, email, password });
+    await API.put('/auth/update', data);
   } catch (err) {
     console.error('Update user failed:', err);
     throw err;
@@ -59,7 +89,7 @@ export const updateUser = async (name: string, email: string, password: string) 
 };
 
 
-export const deleteUser = async () => {
+export const deleteUser = async (): Promise<void> => {
   try {
     await API.delete('/auth/delete');
     localStorage.removeItem('token');

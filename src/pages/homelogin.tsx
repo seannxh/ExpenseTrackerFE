@@ -13,7 +13,7 @@ const Login = () => {
     setAuthing(true);
     setError('');
     try {
-      await login(email, password);
+      await login({email, password});
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Please Try Again.');

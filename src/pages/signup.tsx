@@ -21,7 +21,7 @@ const Signup = () => {
     setError('');
 
     try {
-      await signup(name, email, password);
+      await signup({name, email, password});
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');
