@@ -8,7 +8,6 @@ interface Props {
 
 const PrivateRoute = ({ children }: Props) => {
   const token = localStorage.getItem('token');
-
   return token ? children : <Navigate to="/login" replace />;
 };
 
