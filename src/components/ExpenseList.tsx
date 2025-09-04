@@ -1,14 +1,7 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+// src/components/ExpenseList.tsx
+import { useEffect, useMemo, useState } from 'react';
 import ExpenseItem from './ExpenseItem';
-
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  category: string;
-  date: string;
-}
+import { getExpenses, type Expense } from '../services/expenseService'; // ✅ uses shared API
 
 const ExpenseList = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -17,20 +10,18 @@ const ExpenseList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const fetchExpenses = async () => {
     setLoading(true);
+    setError('');
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
-        params: {
-          startDate,
-          endDate,
-          sort: sortOrder,
-        },
-        withCredentials: true,
+      const data = await getExpenses({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        sort: sortOrder,
       });
-      setExpenses(res.data);
+      setExpenses(data || []);
     } catch (err: any) {
       console.error(err);
       setError('Failed to load expenses');
@@ -41,15 +32,29 @@ const ExpenseList = () => {
 
   useEffect(() => {
     fetchExpenses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filteredExpenses = expenses.filter((expense) =>
-    expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    expense.category.toLowerCase().includes(searchTerm.toLowerCase())
+  // If your backend uses `title`, normalize here so the UI can search by description
+  const normalized = useMemo(
+    () =>
+      (expenses || []).map((e) => ({
+        ...e,
+        description: (e as any).description ?? (e as any).title ?? '',
+      })),
+    [expenses]
   );
 
+  const filteredExpenses = normalized.filter((expense) => {
+    const q = searchTerm.toLowerCase();
+    return (
+      (expense.description || '').toLowerCase().includes(q) ||
+      (expense.category || '').toLowerCase().includes(q)
+    );
+  });
+
   return (
-    <div className="p-4 rounded-md text-white border border-white ">
+    <div className="p-4 rounded-md text-white border border-white">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -71,7 +76,7 @@ const ExpenseList = () => {
         />
         <select
           value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
+          onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
           className="border border-white bg-transparent text-white p-2 rounded"
         >
           <option value="desc">Newest</option>
@@ -95,11 +100,11 @@ const ExpenseList = () => {
 
       {loading && <p className="text-center text-gray-400">Loading expenses...</p>}
       {error && <p className="text-red-400 text-center">{error}</p>}
-      {filteredExpenses.length === 0 && !loading ? (
+      {!loading && filteredExpenses.length === 0 ? (
         <p className="text-gray-400 text-center">No matching expenses.</p>
       ) : (
         filteredExpenses.map((expense) => (
-          <ExpenseItem key={expense.id} {...expense} />
+          <ExpenseItem key={String(expense.id)} {...expense} />
         ))
       )}
     </div>
