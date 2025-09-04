@@ -21,7 +21,7 @@ export const getExpenseById = async (id: number) => {
 
 export const createExpense = async (expense: Omit<Expense, 'id'>) => {
   // Swagger shows POST /api/expenses
-  const res = await API.post('/expenses', expense, { headers: { 'Content-Type': 'application/json' } });
+  const res = await API.post('/expenses/create', expense, { headers: { 'Content-Type': 'application/json' } });
   return res.data as Expense;
 };
 
