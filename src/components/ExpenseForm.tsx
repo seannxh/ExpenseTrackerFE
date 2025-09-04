@@ -1,8 +1,9 @@
+// src/components/ExpenseForm.tsx
 import { useState } from 'react';
-import axios from 'axios';
+import { createExpense } from '../services/expenseService'; // ✅ uses shared API
 
 const ExpenseForm = () => {
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');              // ← align with backend field (title)
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
   const [date, setDate] = useState('');
@@ -15,34 +16,31 @@ const ExpenseForm = () => {
     setMessage('');
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/expenses`,
-        {
-          description,
-          amount: parseFloat(amount),
-          category,
-          date,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Not logged in (no token)');
+
+      await createExpense({
+        title,                                 // ✅ matches service/interface
+        amount: Number(amount),
+        category,
+        date,                                  // ISO yyyy-mm-dd
+      });
 
       setMessage('✅ Expense added successfully!');
-      setDescription('');
+      setTitle('');
       setAmount('');
       setCategory('Food');
       setDate('');
-    } catch (error) {
-      console.error(error);
-      setMessage('❌ Failed to add expense.');
+    } catch (err: any) {
+      console.error(err);
+      setMessage(`❌ Failed to add expense${err?.message ? `: ${err.message}` : ''}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 ">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {message && (
         <p className={`text-sm ${message.includes('✅') ? 'text-teal-400' : 'text-red-400'}`}>
           {message}
@@ -51,10 +49,10 @@ const ExpenseForm = () => {
 
       <input
         type="text"
-        placeholder="Description"
+        placeholder="Title"
         className="w-full px-4 py-2 bg-transparent border border-white text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
         required
       />
 

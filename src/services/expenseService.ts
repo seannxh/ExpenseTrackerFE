@@ -1,77 +1,41 @@
-import axios from 'axios';
+import { API } from './authService';
 
-
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-// Automatically attach token
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Expense type
 export interface Expense {
   id?: number;
   title: string;
   amount: number;
-  date: string;
+  date: string;   // ISO yyyy-mm-dd
   category: string;
 }
 
-
-export const getExpenses = async (): Promise<Expense[]> => {
-  try {
-    const res = await API.get('/expenses/myexpense');
-    return res.data;
-  } catch (err) {
-    console.error('Error fetching expenses:', err);
-    throw err;
-  }
-};
-                                            //remove id when sending request
-export const createExpense = async (expense: Omit<Expense, 'id'>): Promise<Expense> => {
-  try {
-    const res = await API.post('/expenses/create', expense);
-    return res.data;
-  } catch (err) {
-    console.error('Error creating expense:', err);
-    throw err;
-  }
+export const getExpenses = async (params?: { startDate?: string; endDate?: string; sort?: 'asc' | 'desc' }) => {
+  // Swagger showed usage like: /api/expenses?startDate=&endDate=&sort=desc
+  const res = await API.get('/expenses', { params });
+  return res.data as Expense[];
 };
 
-
-export const deleteExpense = async (id: number): Promise<void> => {
-  try {
-    await API.delete(`/expenses/${id}`);
-  } catch (err) {
-    console.error(`Error deleting expense ${id}:`, err);
-    throw err;
-  }
+export const getExpenseById = async (id: number) => {
+  const res = await API.get(`/expenses/${id}`);
+  return res.data as Expense;
 };
 
-
-export const updateExpense = async (id: number, expense: Omit<Expense, 'id'>): Promise<Expense> => {
-  try {
-    const res = await API.put(`/expenses/${id}`, expense);
-    return res.data;
-  } catch (err) {
-    console.error(`Error updating expense ${id}:`, err);
-    throw err;
-  }
+export const createExpense = async (expense: Omit<Expense, 'id'>) => {
+  // Swagger shows POST /api/expenses
+  const res = await API.post('/expenses', expense, { headers: { 'Content-Type': 'application/json' } });
+  return res.data as Expense;
 };
 
+export const updateExpense = async (id: number, expense: Omit<Expense, 'id'>) => {
+  const res = await API.put(`/expenses/${id}`, expense, { headers: { 'Content-Type': 'application/json' } });
+  return res.data as Expense;
+};
 
-export const getExpenseById = async (id: number): Promise<Expense> => {
-  try {
-    const res = await API.get(`/expenses/${id}`);
-    return res.data;
-  } catch (err) {
-    console.error(`Error fetching expense ${id}:`, err);
-    throw err;
-  }
+export const deleteExpense = async (id: number) => {
+  await API.delete(`/expenses/${id}`);
+};
+
+export const getSummaryByCategory = async () => {
+  // Swagger log showed /api/expenses/summary-by-category
+  const res = await API.get('/expenses/summary-by-category');
+  return res.data as Array<{ category: string; total: number }>;
 };
