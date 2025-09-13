@@ -42,7 +42,7 @@ export const deleteExpense = async (id: number) => {
   await API.delete(`expenses/${id}`);
 };
 export const getSummaryByCategory = async (params?: {
-  startDate?: string;       // many backends require these; send last-30-days if you want defaults
+  startDate?: string;     
   endDate?: string;
 }) => {
   const res = await API.get<Array<{ category: string; total: number }>>(

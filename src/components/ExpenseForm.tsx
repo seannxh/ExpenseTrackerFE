@@ -24,7 +24,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
     if (!date) e.date = 'Date is required';
     return e;
   }, [title, amount, date]);
-
+   
   // helper: only show error if user interacted or tried to submit
   const showErr = (field: 'title' | 'amount' | 'date') =>
     (submitted || touched[field]) && errors[field];

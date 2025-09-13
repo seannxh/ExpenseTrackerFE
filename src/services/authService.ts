@@ -148,6 +148,16 @@ export const deleteUser = async (): Promise<void> => {
 };
 
 export const signout = () => {
-  setAuthToken(null);
-  setRefreshToken(null);
-}
+  // Clear tokens
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+
+  //clear ALL localStorage for clean slate.
+  localStorage.clear();
+
+  // Remove axios default header
+  delete API.defaults.headers.Authorization;
+
+  // Also clear sessionStorage if you store anything there
+  sessionStorage.clear();
+};
