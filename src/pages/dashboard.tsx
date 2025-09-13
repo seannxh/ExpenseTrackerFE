@@ -1,71 +1,104 @@
+// src/pages/Dashboard.tsx
+import { useEffect, useState } from 'react';
+import ExpenseChart from '../components/ExpenseChart';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
-import ExpenseChart from '../components/ExpenseChart';
+import ClipLoader from 'react-spinners/ClipLoader';
+import { signout } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
+import ChatWidget from '../components/ChatAiWidget';
 
 const Dashboard = () => {
+  const [refreshFlag, setRefreshFlag] = useState(0);
+  const [query, setQuery] = useState('');
+  const [takeHome, setTakeHome] = useState<number>(() => {
+    const saved = localStorage.getItem('takeHome');
+    return saved ? Number(saved) : 0;
+  });
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    localStorage.setItem('takeHome', String(takeHome || 0));
+  }, [takeHome]);
+
+  
+  const navigate = useNavigate(); 
+
+  const handleSignOut = () => {
+    setLoading(true);
+    signout();
+    setTimeout(() => {
+      navigate('/login'); // 
+    }, 2500);
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#1f1f1f] text-white z-50">
+        <ClipLoader size={60} color="#14b8a6" />
+        <p className="mt-4 text-lg font-semibold">Redirecting…</p>
+      </div>
+    );
+  }
+
+
+  const handleExpenseAdded = () => setRefreshFlag((prev) => prev + 1);
+
   return (
     <div className="fixed inset-0 flex bg-gray-300 text-white font-[Itim] overflow-hidden">
-      
-      {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#1f1f1f] p-6 space-y-6 shadow-lg">
-        <div className="text-white text-2xl font-bold flex items-center gap-2">
-          <i className="bx bx-infinite text-3xl text-teal-400"></i>
-          Finavise
-        </div>
-        <nav className="flex flex-col space-y-2">
-          {['Dashboard', 'Analytics', 'Transactions', 'Account', 'Settings'].map((label, i) => (
-            <a
-              key={label}
-              href="#"
-              className="flex items-center space-x-3 text-gray-300 hover:bg-gray-800 p-3 rounded-md transition"
-            >
-              <i className={`bx bx-${['home-alt', 'line-chart', 'wallet', 'user', 'cog'][i]} text-teal-400`}></i>
-              <span>{label}</span>
-            </a>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto flex flex-col px-6 py-8 md:px-12 md:py-10">
-        
         {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl text-[#1f1f1f] font-bold">Dashboard</h1>
-            <p className="text-gray-400 text-sm">Welcome back, Sean</p>
+            <p className="text-gray-400 text-sm">Welcome back!</p>
           </div>
-          <div className="w-full md:w-80 relative">
-            <input
-              type="text"
-              placeholder="Search expenses..."
-              className="w-full px-4 py-2 bg-[#1f1f1f] border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm text-white"
-            />
-            <i className="bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+
+          {/* Search + Take-home */}
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+
+            <div className="flex items-center gap-2">
+              <label className="text-[#1f1f1f] text-sm font-semibold">Monthly Take-Home</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min={0}
+                value={Number.isFinite(takeHome) ? takeHome : 0}
+                onChange={(e) => setTakeHome(Number(e.target.value || 0))}
+                className="w-40 px-3 py-2 bg-[#1f1f1f] border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm text-white"
+                placeholder="e.g. 4000"
+              />
+            </div>
           </div>
         </header>
 
         {/* Cards */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Expense Chart */}
           <div className="bg-[#1f1f1f] rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Spending Overview</h2>
-            <ExpenseChart />
+            <ExpenseChart refreshFlag={refreshFlag} query={query} takeHome={takeHome} />
           </div>
 
-          {/* Expense Form */}
           <div className="bg-[#1f1f1f] rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Record Expense</h2>
-            <ExpenseForm />
+            <ExpenseForm onAdded={handleExpenseAdded} />
           </div>
         </div>
 
-        {/* Expense List */}
         <div className="bg-[#1f1f1f] rounded-lg shadow-lg p-6 mt-8">
           <h2 className="text-xl font-semibold mb-4">Your Expenses</h2>
-          <ExpenseList />
+          <ExpenseList refreshFlag={refreshFlag} query={query} />
+        </div>
+         <div className="mt-12 flex justify-center">
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-3 bg-[#1f1f1f] hover:bg-red-600 transition rounded-md text-white font-semibold shadow-md"
+          >
+            Sign Out
+          </button>
         </div>
       </div>
+      <ChatWidget />
     </div>
   );
 };

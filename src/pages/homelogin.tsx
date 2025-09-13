@@ -1,34 +1,42 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authing, setAuthing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    setAuthing(true);
+    setLoading(true);
     setError('');
     try {
-      await login({email, password});
+      await login({ email, password });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Please Try Again.');
-      setAuthing(false);
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#1f1f1f] text-white">
+        <ClipLoader size={60} color="#14b8a6" />
+        <p className="mt-4 text-lg font-semibold">Redirecting…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 flex overflow-hidden">
-      {/* Left side */}
-      <div className="flex-1 bg-[#282c34] hidden md:flex items-center justify-center">
-        {/* Optional: logo or illustration */}
-      </div>
+      {/* Left */}
+      <div className="flex-1 bg-[#282c34] hidden md:flex items-center justify-center"></div>
 
-      {/* Right side */}
+      {/* Right */}
       <div className="flex-1 bg-[#1a1a1a] flex items-center justify-center p-6 md:p-20">
         <div className="w-full max-w-md text-white">
           <h3 className="text-4xl font-bold mb-2">Login</h3>
@@ -55,14 +63,14 @@ const Login = () => {
           <button
             className="w-full bg-white text-black font-semibold p-4 rounded-md"
             onClick={handleLogin}
-            disabled={authing}
+            disabled={loading}
           >
             Log In
           </button>
 
           <p className="text-sm text-gray-400 mt-10 text-center">
             Don’t have an account?{' '}
-            <a href="/signup" className="text-white underline">Sign Up</a>
+            <a href="/" className="text-white underline">Sign Up</a>
           </p>
         </div>
       </div>

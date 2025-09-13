@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [authing, setAuthing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -17,17 +18,27 @@ const Signup = () => {
       return;
     }
 
-    setAuthing(true);
+    setLoading(true);
     setError('');
 
     try {
-      await signup({name, email, password});
+      await signup({ name, email, password });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');
-      setAuthing(false);
+      setLoading(false);
     }
   };
+
+  // 🔹 Fullscreen loading overlay
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#1f1f1f] text-white">
+        <ClipLoader size={60} color="#14b8a6" />
+        <p className="mt-4 text-lg font-semibold">Creating your account…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex overflow-hidden">
@@ -79,7 +90,7 @@ const Signup = () => {
           <button
             className="w-full bg-white text-black font-semibold p-4 rounded-md"
             onClick={handleSignup}
-            disabled={authing}
+            disabled={loading}
           >
             Sign Up
           </button>

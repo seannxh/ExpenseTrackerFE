@@ -10,7 +10,7 @@ export interface Expense {
 }
 
 // GET /api/expenses/myexpense
-export const getExpenses = async () => {
+export const getExpenses = async (p0: { startDate: string | undefined; endDate: string | undefined; sort: "asc" | "desc"; search: string | undefined; }, signal: AbortSignal | undefined) => {
   const res = await API.get<Expense[]>('expenses/myexpense');
   return res.data;
 };

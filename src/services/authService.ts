@@ -146,3 +146,8 @@ export const deleteUser = async (): Promise<void> => {
   setAuthToken(null);
   setRefreshToken(null);
 };
+
+export const signout = () => {
+  setAuthToken(null);
+  setRefreshToken(null);
+}
