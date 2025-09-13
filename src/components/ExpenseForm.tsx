@@ -12,7 +12,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // NEW: track if user tried to submit, and per-field touch
+  //track if user tried to submit, and per-field touch
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<{title?: boolean; amount?: boolean; date?: boolean}>({});
 

@@ -1,4 +1,3 @@
-// src/components/ExpenseChart.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getExpenses } from '../services/expenseService';
@@ -6,8 +5,7 @@ import { getExpenses } from '../services/expenseService';
 type Slice = { name: string; value: number };
 
 const CATEGORY_COLORS = ['#ef4444', '#3b82f6', '#8b5cf6', '#facc15', '#fb923c']; 
-// red, blue, purple, yellow, orange
-const REMAINING_COLOR = '#22c55e'; // green for take-home (Remaining)
+const REMAINING_COLOR = '#22c55e';
 
 type Props = {
   refreshFlag: number;
@@ -30,11 +28,7 @@ const ExpenseChart = ({ refreshFlag, query = '', takeHome = 0 }: Props) => {
       setError('');
       try {
         const expenses = await getExpenses(
-          {
-            sort: 'desc', search: query || undefined,
-            startDate: undefined,
-            endDate: undefined
-          },
+          { sort: 'desc', search: query || undefined, startDate: undefined, endDate: undefined },
           controller.signal
         );
 
@@ -62,7 +56,7 @@ const ExpenseChart = ({ refreshFlag, query = '', takeHome = 0 }: Props) => {
 
         if (mounted.current) setData(pie);
       } catch (err: any) {
-        if (err?.name === 'CanceledError') return;
+        if (err?.name === 'CanceledError' || err?.name === 'AbortError') return;
         console.error('[chart] failed to load expenses:', err?.response?.status, err?.response?.data);
         if (mounted.current) setError('Failed to load chart data');
       } finally {

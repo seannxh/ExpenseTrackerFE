@@ -41,6 +41,7 @@ export const updateExpense = async (id: number, expense: Omit<Expense, 'id'>) =>
 export const deleteExpense = async (id: number) => {
   await API.delete(`expenses/${id}`);
 };
+
 export const getSummaryByCategory = async (params?: {
   startDate?: string;     
   endDate?: string;

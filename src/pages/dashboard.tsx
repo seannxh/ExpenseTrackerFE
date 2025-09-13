@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 import { useEffect, useState } from 'react';
 import ExpenseChart from '../components/ExpenseChart';
 import ExpenseForm from '../components/ExpenseForm';
@@ -11,23 +10,25 @@ import ChatWidget from '../components/ChatAiWidget';
 const Dashboard = () => {
   const [refreshFlag, setRefreshFlag] = useState(0);
   const [query, setQuery] = useState('');
+  const bump = () => setRefreshFlag(f => f + 1);
+
   const [takeHome, setTakeHome] = useState<number>(() => {
     const saved = localStorage.getItem('takeHome');
     return saved ? Number(saved) : 0;
   });
+
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     localStorage.setItem('takeHome', String(takeHome || 0));
   }, [takeHome]);
 
-  
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleSignOut = () => {
     setLoading(true);
     signout();
     setTimeout(() => {
-      navigate('/login'); // 
+      navigate('/login');
     }, 2500);
   };
 
@@ -39,9 +40,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-
-  const handleExpenseAdded = () => setRefreshFlag((prev) => prev + 1);
 
   return (
     <div className="fixed inset-0 flex bg-gray-300 text-white font-[Itim] overflow-hidden">
@@ -55,7 +53,13 @@ const Dashboard = () => {
 
           {/* Search + Take-home */}
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-
+            {/* global search if you want it */}
+            {/* <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              className="px-3 py-2 bg-[#1f1f1f] border border-white rounded-md text-sm text-white"
+            /> */}
             <div className="flex items-center gap-2">
               <label className="text-[#1f1f1f] text-sm font-semibold">Monthly Take-Home</label>
               <input
@@ -81,15 +85,16 @@ const Dashboard = () => {
 
           <div className="bg-[#1f1f1f] rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Record Expense</h2>
-            <ExpenseForm onAdded={handleExpenseAdded} />
+            <ExpenseForm onAdded={bump} />
           </div>
         </div>
 
         <div className="bg-[#1f1f1f] rounded-lg shadow-lg p-6 mt-8">
           <h2 className="text-xl font-semibold mb-4">Your Expenses</h2>
-          <ExpenseList refreshFlag={refreshFlag} query={query} />
+          <ExpenseList refreshFlag={refreshFlag} query={query} onChanged={bump} />
         </div>
-         <div className="mt-12 flex justify-center">
+
+        <div className="mt-12 flex justify-center">
           <button
             onClick={handleSignOut}
             className="px-4 py-3 bg-[#1f1f1f] hover:bg-red-600 transition rounded-md text-white font-semibold shadow-md"

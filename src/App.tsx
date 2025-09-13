@@ -5,6 +5,7 @@ import Signup from './pages/signup';
 import RequireAuth from './components/requiredauth';
 
 function App() {
+
   return (
     <>
       <Routes>

@@ -1,5 +1,7 @@
-// src/components/ExpenseList.tsx
-import { useEffect, useMemo, useState } from 'react';
+// keep only AUTO-FETCH style; remove manual submit fetch
+// key changes: use debouncedQuery everywhere; guard dates; handle AbortError
+
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import ExpenseItem from './ExpenseItem';
 import { getExpenses, type Expense } from '../services/expenseService';
 
@@ -14,55 +16,67 @@ function useDebounced<T>(value: T, ms = 300) {
 
 const ExpenseList = ({
   refreshFlag,
-  query = '',
+  query,
+  onChanged,
 }: {
   refreshFlag: number;
   query?: string;
+  onChanged?: () => void;
 }) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [localSearch, setLocalSearch] = useState(''); // local override if you want per-list searching
+  const [localSearch, setLocalSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // prefer header query; fall back to local input
   const effectiveQuery = (query ?? '').trim() || (localSearch ?? '').trim();
   const debouncedQuery = useDebounced(effectiveQuery, 300);
 
-  const fetchExpenses = async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await getExpenses(
-        {
-          startDate: startDate || undefined,
-          endDate: endDate || undefined,
-          sort: sortOrder,              // 'asc' | 'desc'
-          search: debouncedQuery || undefined, // <-- pass to API if supported
-        },
-        signal
-      );
-      setExpenses(data || []);
-    } catch (err: any) {
-      if (err.name === 'CanceledError') return;
-      console.error(err);
-      setError('Failed to load expenses');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const queryParams = useMemo(
+    () => ({
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      sort: sortOrder,
+      search: debouncedQuery || undefined,
+    }),
+    [startDate, endDate, sortOrder, debouncedQuery]
+  );
 
-  // initial + whenever filters or refreshFlag change
+  const datesInvalid =
+    startDate && endDate ? new Date(endDate) < new Date(startDate) : false;
+
+  const fetchExpenses = useCallback(
+    async (signal?: AbortSignal) => {
+      if (datesInvalid) {
+        setError('End date must be on/after start date');
+        setExpenses([]);
+        return;
+      }
+      setLoading(true);
+      setError('');
+      try {
+        const data = await getExpenses(queryParams, signal);
+        setExpenses(data || []);
+      } catch (err: any) {
+        // Handle both fetch and axios styles
+        if (err?.name === 'AbortError' || err?.name === 'CanceledError') return;
+        console.error(err);
+        setError('Failed to load expenses');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [queryParams, datesInvalid]
+  );
+
   useEffect(() => {
     const controller = new AbortController();
     fetchExpenses(controller.signal);
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshFlag, startDate, endDate, sortOrder, debouncedQuery]);
+  }, [fetchExpenses, refreshFlag]);
 
-  // normalize title->description if backend differs
   const normalized = useMemo(
     () =>
       (expenses || []).map((e) => ({
@@ -72,28 +86,21 @@ const ExpenseList = ({
     [expenses]
   );
 
-  // if your backend already supports ?search, you can drop this client-side filter
+  // If server handles search, remove this client filter
   const filtered = useMemo(() => {
-    const q = (effectiveQuery || '').toLowerCase();
+    const q = (debouncedQuery || '').toLowerCase();
     if (!q) return normalized;
-    return normalized.filter((expense) =>
-      (expense.description || '').toLowerCase().includes(q) ||
-      (expense.category || '').toLowerCase().includes(q)
+    return normalized.filter(
+      (expense) =>
+        (expense.description || '').toLowerCase().includes(q) ||
+        (expense.category || '').toLowerCase().includes(q)
     );
-  }, [normalized, effectiveQuery]);
+  }, [normalized, debouncedQuery]);
 
   return (
     <div className="p-4 rounded-md text-white border border-white">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          // manual apply triggers by changing a dep (e.g., refreshFlag) is optional,
-          // but we already refetch on date/sort change automatically.
-          // If you only want fetch on button click, move fetch to here and remove deps.
-          fetchExpenses();
-        }}
-        className="flex flex-wrap gap-3 mb-4"
-      >
+      {/* Controls (no manual submit) */}
+      <div className="flex flex-wrap gap-3 mb-4">
         <input
           type="date"
           value={startDate}
@@ -114,15 +121,14 @@ const ExpenseList = ({
           <option value="desc">Newest</option>
           <option value="asc">Oldest</option>
         </select>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-white hover:bg-teal-500 transition text-black font-semibold rounded-md"
-        >
-          Apply
-        </button>
-      </form>
+      </div>
 
-      {/* Optional component-local search; if you rely on header query only, you can remove this input */}
+      {datesInvalid && (
+        <p className="text-yellow-300 mb-2">
+          End date must be on/after start date.
+        </p>
+      )}
+
       <input
         type="text"
         value={localSearch}
@@ -137,7 +143,16 @@ const ExpenseList = ({
         <p className="text-gray-400 text-center">No matching expenses.</p>
       ) : (
         filtered.map((expense) => (
-          <ExpenseItem key={String(expense.id)} {...expense} />
+          <ExpenseItem
+            key={String(expense.id)}
+            {...expense}
+            onDeleted={() => {
+              // refetch list…
+              fetchExpenses();
+              // …and tell Dashboard to bump -> refresh chart
+              onChanged?.();
+            }}
+          />
         ))
       )}
     </div>
