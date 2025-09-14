@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signup } from '../services/authService';
 import ClipLoader from 'react-spinners/ClipLoader';
+import { Link } from 'react-router-dom';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -97,7 +98,7 @@ const Signup = () => {
 
           <p className="text-sm text-gray-400 mt-10 text-center">
             Already have an account?{' '}
-            <a href="/login" className="text-white underline">Log In</a>
+            <Link to="/login" className="text-white underline">Log In</Link>
           </p>
         </div>
       </div>
