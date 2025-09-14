@@ -51,8 +51,10 @@ API.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+
+
 /** Optional: auto-refresh on 401 with single-flight */
-let isRefreshing = false;
+let isRefreshing: boolean = false;
 let waiters: Array<(t: string) => void> = [];
 
 API.interceptors.response.use(

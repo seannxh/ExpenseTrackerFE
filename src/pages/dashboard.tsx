@@ -9,7 +9,7 @@ import ChatWidget from '../components/ChatAiWidget';
 
 const Dashboard = () => {
   const [refreshFlag, setRefreshFlag] = useState(0);
-  const [query, setQuery] = useState('');
+  const [query, _setQuery] = useState('');
   const bump = () => setRefreshFlag(f => f + 1);
 
   const [takeHome, setTakeHome] = useState<number>(() => {

@@ -1,20 +1,27 @@
 // src/components/ExpenseForm.tsx
 import { useMemo, useState } from 'react';
-import { createExpense, type CreateExpenseDTO } from '../services/expenseService';
+import { createExpense } from '../services/expenseService';
+
+// Keep this DTO local so we don't depend on the Expense type from elsewhere
+type CreateExpenseDTO = {
+  description: string;       // map from `title`
+  amount: number;            // send number, not string
+  category: string;
+  date: string;              // ISO or yyyy-mm-dd (backend should parse)
+};
 
 type Props = { onAdded?: () => void };
 
 const ExpenseForm = ({ onAdded }: Props) => {
   const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('');      // keep as string for input
   const [category, setCategory] = useState('Food');
   const [date, setDate] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  //track if user tried to submit, and per-field touch
   const [submitted, setSubmitted] = useState(false);
-  const [touched, setTouched] = useState<{title?: boolean; amount?: boolean; date?: boolean}>({});
+  const [touched, setTouched] = useState<{ title?: boolean; amount?: boolean; date?: boolean }>({});
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
@@ -24,14 +31,13 @@ const ExpenseForm = ({ onAdded }: Props) => {
     if (!date) e.date = 'Date is required';
     return e;
   }, [title, amount, date]);
-   
-  // helper: only show error if user interacted or tried to submit
+
   const showErr = (field: 'title' | 'amount' | 'date') =>
     (submitted || touched[field]) && errors[field];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);          // mark that user attempted submit
+    setSubmitted(true);
     setMessage('');
     if (Object.keys(errors).length) {
       setMessage('❌ Please fix the highlighted fields.');
@@ -40,17 +46,24 @@ const ExpenseForm = ({ onAdded }: Props) => {
 
     try {
       setLoading(true);
+
+      // Build the payload VALUE (not a type)
       const payload: CreateExpenseDTO = {
-        title: title.trim(),
+        description: title.trim(),
         amount: Number(amount),
         category,
-        date,
+        date, // assuming yyyy-mm-dd from <input type="date" />
       };
-      await createExpense(payload);
+
+      await createExpense(payload); // <-- pass the value
+
       setMessage('✅ Expense added successfully!');
-      setTitle(''); setAmount(''); setCategory('Food'); setDate('');
-      setSubmitted(false);       // reset submit state for fresh form
-      setTouched({});            // clear touched
+      setTitle('');
+      setAmount('');
+      setCategory('Food');
+      setDate('');
+      setSubmitted(false);
+      setTouched({});
       onAdded?.();
     } catch (err: any) {
       const apiMsg: string | undefined = err?.response?.data?.error;
@@ -62,75 +75,55 @@ const ExpenseForm = ({ onAdded }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {message && (
-        <p className={`text-sm ${message.startsWith('✅') ? 'text-teal-400' : 'text-red-400'}`}>
-          {message}
-        </p>
-      )}
-
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div>
+        <label>Title</label>
         <input
-          type="text"
-          placeholder="Title"
-          className={`w-full px-4 py-2 bg-transparent border ${
-            showErr('title') ? 'border-red-400' : 'border-white'
-          } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500`}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, title: true }))}  // mark touched
+          onBlur={() => setTouched((t) => ({ ...t, title: true }))}
         />
-        {showErr('title') && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
+        {showErr('title') && <p className="text-red-600 text-sm">{errors.title}</p>}
       </div>
 
       <div>
+        <label>Amount</label>
         <input
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          placeholder="Amount"
-          className={`w-full px-4 py-2 bg-transparent border ${
-            showErr('amount') ? 'border-red-400' : 'border-white'
-          } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500`}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, amount: true }))} // mark touched
+          onBlur={() => setTouched((t) => ({ ...t, amount: true }))}
+          inputMode="decimal"
         />
-        {showErr('amount') && <p className="text-xs text-red-400 mt-1">{errors.amount}</p>}
+        {showErr('amount') && <p className="text-red-600 text-sm">{errors.amount}</p>}
       </div>
-
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="w-full px-4 py-2 bg-transparent border border-white text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-      >
-        {['Food', 'Transport', 'Entertainment', 'Health', 'Utilities', 'Other'].map((cat) => (
-          <option key={cat} value={cat} className="bg-[#1a1a1a] text-white">
-            {cat}
-          </option>
-        ))}
-      </select>
 
       <div>
-        <input
-          type="date"
-          className={`w-full px-4 py-2 bg-transparent border ${
-            showErr('date') ? 'border-red-400' : 'border-white'
-          } text-white rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500`}
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          onBlur={() => setTouched((t) => ({ ...t, date: true }))}   // mark touched
-        />
-        {showErr('date') && <p className="text-xs text-red-400 mt-1">{errors.date}</p>}
+        <label>Category</label>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option>Food</option>
+          <option>Rent</option>
+          <option>Utilities</option>
+          <option>Transportation</option>
+          <option>Other</option>
+        </select>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-white hover:bg-teal-500 transition text-black font-semibold py-2 rounded-md disabled:opacity-60"
-      >
-        {loading ? 'Submitting…' : 'Add Expense'}
+      <div>
+        <label>Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          onBlur={() => setTouched((t) => ({ ...t, date: true }))}
+        />
+        {showErr('date') && <p className="text-red-600 text-sm">{errors.date}</p>}
+      </div>
+
+      <button type="submit" disabled={loading}>
+        {loading ? 'Adding…' : 'Add Expense'}
       </button>
+
+      {message && <p>{message}</p>}
     </form>
   );
 };
