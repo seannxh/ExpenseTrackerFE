@@ -2,7 +2,7 @@ import { deleteExpense } from "../services/expenseService";
 
 interface ExpenseItemProps {
   id?: number;
-  description: string;
+  title: string;
   amount: number;
   category: string;
   date: string;
