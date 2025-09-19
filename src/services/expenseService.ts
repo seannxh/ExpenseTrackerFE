@@ -3,7 +3,7 @@ import { API } from './authService';
 
 export interface Expense {
   id?: number;
-  description: string;   // must match ExpenseModel field names
+  title: string;   // must match ExpenseModel field names
   amount: number;
   category: string;
   date: string;          // yyyy-MM-dd
