@@ -1,7 +1,8 @@
 # 💸 ExpenseTracker FE (React)
 
 
-<img width="3791" height="2012" alt="Screenshot 2025-09-18 203554" src="https://github.com/user-attachments/assets/266b9edf-fcf4-4eee-a706-5eeb2e4e334a" />
+<img width="3775" height="1959" alt="Screenshot 2025-09-18 204354" src="https://github.com/user-attachments/assets/095f8ac5-9d5a-4980-95bd-559ad4939362" />
+
 
 A sleek, production-ready **React + TypeScript** frontend for the [ExpenseTracker API](https://github.com/seannxh/ExpenseTrackerBE).  
 Features secure auth (JWT), user-scoped expense tracking, monthly take-home budgeting, filtering/sorting/search, and charts — all wrapped in a modern dark UI.
