@@ -7,6 +7,9 @@ A sleek, production-ready **React + TypeScript** frontend for the [ExpenseTracke
 Features secure auth (JWT), user-scoped expense tracking, monthly take-home budgeting, filtering/sorting/search, and charts — all wrapped in a modern dark UI.
 
 ---
+##TESTING ACCOUNT
+## Username: user@testing.com
+## Password: User123!
 
 ## 🌐 Live Demo
 
