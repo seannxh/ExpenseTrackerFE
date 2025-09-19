@@ -34,6 +34,7 @@ http://expensetracker-env.eba-2mpjph9f.us-east-2.elasticbeanstalk.com/swagger-ui
 - **Zod** (optional: request/response validation)
 - **ESLint + Prettier** (lint/format)
 - **GitHub Actions** (CI lint/build)
+- **OpenAI API** (chatbot + AI-powered assistant)
 
 ---
 
@@ -57,7 +58,12 @@ http://expensetracker-env.eba-2mpjph9f.us-east-2.elasticbeanstalk.com/swagger-ui
 - **Charts**
   - Category distribution & monthly trend (Recharts)
 
+- **AI Chatbot**
+  - Integrated **OpenAI-powered chatbot** for financial Q&A and expense insights
+  - Context-aware responses (personalized based on user’s data)
+  - Available directly inside the dashboard as an assistant
+
 - **Developer Experience**
   - Strong TypeScript models & DTOs
   - Reusable hooks and Axios client
-  - Environment-driven config (`VITE_API_BASE_URL`)
+  - Environment-driven config (`VITE_API_BASE_URL` & `VITE_OPENAI_API_KEY`)
