@@ -3,7 +3,7 @@ import { API } from './authService';
 
 export interface Expense {
   id?: number;
-  description: string;   // must match ExpenseModel field names
+  title: string;   // must match ExpenseModel field names
   amount: number;
   category: string;
   date: string;          // yyyy-MM-dd
@@ -17,10 +17,7 @@ type ExpenseFilters = {
 };
 
 // GET /api/expenses/myexpense
-export const getExpenses = async (
-  filters: ExpenseFilters,
-  signal?: AbortSignal
-) => {
+export const getExpenses = async (filters: ExpenseFilters,signal?: AbortSignal) => {
   const res = await API.get<Expense[]>('expenses/myexpense', {
     params: filters,
     signal,           

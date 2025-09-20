@@ -2,7 +2,7 @@ import { deleteExpense } from "../services/expenseService";
 
 interface ExpenseItemProps {
   id?: number;
-  description: string;
+  title: string;
   amount: number;
   category: string;
   date: string;
@@ -11,7 +11,7 @@ interface ExpenseItemProps {
 
 const ExpenseItem = ({
   id,
-  description,
+  title,
   amount,
   category,
   date,
@@ -33,7 +33,7 @@ const ExpenseItem = ({
   return (
     <div className="flex justify-between items-center bg-[#282c34] p-4 rounded-md shadow mb-2 border border-gray-700">
       <div>
-        <h4 className="text-lg font-semibold text-white">{description}</h4>
+        <h4 className="text-lg font-semibold text-white">{title}</h4>
         <p className="text-sm text-gray-400">
           {new Date(date).toLocaleDateString()}
         </p>

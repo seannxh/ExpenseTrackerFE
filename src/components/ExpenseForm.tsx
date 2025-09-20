@@ -2,19 +2,18 @@
 import { useMemo, useState } from 'react';
 import { createExpense } from '../services/expenseService';
 
-// Keep this DTO local so we don't depend on the Expense type from elsewhere
 type CreateExpenseDTO = {
-  description: string;       // map from `title`
-  amount: number;            // send number, not string
+  title: string;
+  amount: number;
   category: string;
-  date: string;              // ISO or yyyy-mm-dd (backend should parse)
+  date: string;
 };
 
 type Props = { onAdded?: () => void };
 
 const ExpenseForm = ({ onAdded }: Props) => {
   const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');      // keep as string for input
+  const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
   const [date, setDate] = useState('');
   const [message, setMessage] = useState('');
@@ -46,16 +45,14 @@ const ExpenseForm = ({ onAdded }: Props) => {
 
     try {
       setLoading(true);
-
-      // Build the payload VALUE (not a type)
       const payload: CreateExpenseDTO = {
-        description: title.trim(),
+        title: title.trim(),
         amount: Number(amount),
         category,
-        date, // assuming yyyy-mm-dd from <input type="date" />
+        date,
       };
 
-      await createExpense(payload); // <-- pass the value
+      await createExpense(payload);
 
       setMessage('✅ Expense added successfully!');
       setTitle('');
@@ -75,31 +72,37 @@ const ExpenseForm = ({ onAdded }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-white/10 p-6 rounded-xl shadow-md">
       <div>
-        <label>Title</label>
+        <label className="block text-lg font-medium text-white mb-1">Title</label>
         <input
+          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700 text-white"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, title: true }))}
         />
-        {showErr('title') && <p className="text-red-600 text-sm">{errors.title}</p>}
+        {showErr('title') && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
       </div>
 
       <div>
-        <label>Amount</label>
+        <label className="block text-lg font-medium text-white mb-1">Amount</label>
         <input
+          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700 text-white"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, amount: true }))}
           inputMode="decimal"
         />
-        {showErr('amount') && <p className="text-red-600 text-sm">{errors.amount}</p>}
+        {showErr('amount') && <p className="text-red-500 text-sm mt-1">{errors.amount}</p>}
       </div>
 
       <div>
-        <label>Category</label>
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+        <label className="block text-lg font-medium text-white mb-1">Category</label>
+        <select
+          className="w-full text-white px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
           <option>Food</option>
           <option>Rent</option>
           <option>Utilities</option>
@@ -109,21 +112,26 @@ const ExpenseForm = ({ onAdded }: Props) => {
       </div>
 
       <div>
-        <label>Date</label>
+        <label className="block text-lg font-medium text-white mb-1">Date</label>
         <input
           type="date"
+          className="w-full text-white px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, date: true }))}
         />
-        {showErr('date') && <p className="text-red-600 text-sm">{errors.date}</p>}
+        {showErr('date') && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
       </div>
 
-      <button type="submit" disabled={loading}>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-2 px-4 rounded-md bg-green-700 text-white font-semibold hover:bg-green-700 transition disabled:opacity-50"
+      >
         {loading ? 'Adding…' : 'Add Expense'}
       </button>
 
-      {message && <p>{message}</p>}
+      {message && <p className="text-sm text-center mt-2">{message}</p>}
     </form>
   );
 };

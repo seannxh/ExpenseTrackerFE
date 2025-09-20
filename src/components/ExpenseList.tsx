@@ -81,7 +81,7 @@ const ExpenseList = ({
     () =>
       (expenses || []).map((e) => ({
         ...e,
-        description: (e as any).description ?? (e as any).title ?? '',
+        title: (e as any).title ?? (e as any).title ?? '',
       })),
     [expenses]
   );
@@ -92,7 +92,7 @@ const ExpenseList = ({
     if (!q) return normalized;
     return normalized.filter(
       (expense) =>
-        (expense.description || '').toLowerCase().includes(q) ||
+        (expense.title || '').toLowerCase().includes(q) ||
         (expense.category || '').toLowerCase().includes(q)
     );
   }, [normalized, debouncedQuery]);
@@ -143,17 +143,18 @@ const ExpenseList = ({
         <p className="text-gray-400 text-center">No matching expenses.</p>
       ) : (
         filtered.map((expense) => (
-          <ExpenseItem
-            key={String(expense.id)}
-            {...expense}
-            onDeleted={() => {
-              // refetch list…
-              fetchExpenses();
-              // …and tell Dashboard to bump -> refresh chart
-              onChanged?.();
-            }}
-          />
-        ))
+  <ExpenseItem
+    key={String(expense.id ?? `${expense.date}-${expense.amount}`)}
+    {...expense}
+    // defensive fallback so it never shows blank
+    title={expense.title?.trim() ? expense.title : '(untitled)'}
+    onDeleted={() => {
+      fetchExpenses();
+      onChanged?.();
+    }}
+  />
+))
+
       )}
     </div>
   );
