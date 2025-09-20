@@ -76,7 +76,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
       <div>
         <label className="block text-lg font-medium text-white mb-1">Title</label>
         <input
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700 text-white"
+          className="w-full px-3 py-2 rounded-md border border-gray-300 bg-black text-white focus:outline-none focus:ring-2 focus:ring-green-700"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, title: true }))}
@@ -87,7 +87,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
       <div>
         <label className="block text-lg font-medium text-white mb-1">Amount</label>
         <input
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700 text-white"
+          className="w-full px-3 py-2 rounded-md border border-gray-300 bg-black text-white focus:outline-none focus:ring-2 focus:ring-green-700"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, amount: true }))}
@@ -99,7 +99,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
       <div>
         <label className="block text-lg font-medium text-white mb-1">Category</label>
         <select
-          className="w-full text-white px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700"
+          className="w-full px-3 py-2 rounded-md border border-gray-300 bg-black text-white focus:outline-none focus:ring-2 focus:ring-green-700"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -115,11 +115,12 @@ const ExpenseForm = ({ onAdded }: Props) => {
         <label className="block text-lg font-medium text-white mb-1">Date</label>
         <input
           type="date"
-          className="w-full text-white px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bg-green-700"
+          className="date-input w-full px-3 py-2 rounded-md border border-gray-300 bg-black text-white focus:outline-none focus:ring-2 focus:ring-green-700"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, date: true }))}
         />
+
         {showErr('date') && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
       </div>
 
@@ -133,7 +134,7 @@ const ExpenseForm = ({ onAdded }: Props) => {
 
       {message && <p className="text-sm text-center mt-2">{message}</p>}
     </form>
-  );
-};
+    );
+  };
 
 export default ExpenseForm;

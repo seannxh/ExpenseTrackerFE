@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Chrome, Edge, Safari */
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);   /* inverts colors: black → white */
+  cursor: pointer;
+}
+
+/* Firefox */
+.date-input::-moz-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
